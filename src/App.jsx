@@ -343,10 +343,11 @@ export default function App() {
 
           <RevealOnScroll delay={200} className="flex flex-col md:flex-row items-center justify-center gap-4 relative z-10">
               <a
-                href="//cv_pdf/cv_samake.pdf"
-                download="Samake_Ibrahim_CV.pdf"
+                href="https://drive.google.com/uc?export=download&id=1JU8B0R8_AeArCpqi9oh0522vCaBginXR"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-full md:w-auto bg-white text-black hover:bg-gray-100 font-semibold py-3 px-8 rounded-full flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-              >
+                >
                 Télécharger CV PDF <Download size={18} />
               </a>
             
