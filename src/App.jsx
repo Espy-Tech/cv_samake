@@ -15,59 +15,48 @@ import {
 
 const CustomStyles = () => (
   <style dangerouslySetInnerHTML={{ __html: `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
     :root {
       --gold: #D4AF37;
       --bg-dark: #0a0a0c;
+      --text: #e6e6e6;
+      --muted: #9ca3af;
     }
+
+    html { scroll-behavior: smooth; }
 
     body {
       background-color: var(--bg-dark);
-      color: #ffffff;
-      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
       -webkit-font-smoothing: antialiased;
       margin: 0;
       min-height: 100vh;
     }
 
-    .font-serif {
-      font-family: 'Playfair Display', serif;
-    }
+    .font-serif { font-family: 'Playfair Display', serif; }
 
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
-    }
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.active { opacity: 1; transform: translateY(0); }
 
-    .reveal.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .timeline-line { position: absolute; left: 11px; top: 24px; bottom: 0; width: 1px; background: linear-gradient(to bottom, var(--gold) 0%, transparent 100%); opacity: 0.3; }
 
-    .timeline-line {
-      position: absolute;
-      left: 11px;
-      top: 24px;
-      bottom: 0;
-      width: 1px;
-      background: linear-gradient(to bottom, var(--gold) 0%, transparent 100%);
-      opacity: 0.3;
-    }
+    :focus { outline: none; }
+    :focus-visible { outline: 3px solid rgba(212,175,55,0.18); outline-offset: 3px; }
 
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--bg-dark);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #333;
-      border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--gold);
+    .btn-focus { transition: box-shadow .15s ease; }
+    .btn-focus:focus-visible { box-shadow: 0 0 0 6px rgba(212,175,55,0.08); }
+
+    .skip-link:focus, .skip-link:active { position: static; width: auto; height: auto; left: 1rem; top: 1rem; background: #111; color: var(--gold); padding: .5rem 1rem; border-radius: 6px; z-index: 9999; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #2b2b2b; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { transition: none !important; transform: none !important; }
     }
   ` }} />
 );
@@ -113,8 +102,25 @@ export default function App() {
     <div className="min-h-screen bg-[#0a0a0c] text-zinc-300 selection:bg-[#D4AF37] selection:text-black">
       <CustomStyles />
 
-      <main className="max-w-3xl mx-auto px-6 py-12 md:py-20 flex flex-col gap-20">
-        <section className="flex flex-col items-center text-center mt-8">
+      <header role="banner" className="max-w-5xl mx-auto px-6 py-4 md:py-6 flex items-center justify-between">
+        <a href="#home" className="text-white font-serif text-lg">Ibrahim <span className="text-[#D4AF37]">Samake</span></a>
+        <nav aria-label="Navigation principale" className="hidden sm:flex items-center gap-4 text-sm text-zinc-400">
+          <a href="#experience" className="hover:text-white">Projets</a>
+          <a href="#education" className="hover:text-white">Parcours</a>
+          <a href="#contact" className="hover:text-white">Contact</a>
+        </nav>
+      </header>
+
+      <main id="main" role="main" className="max-w-4xl mx-auto px-6 py-6 md:py-8 flex flex-col gap-20">
+        <section id="home" className="flex flex-col items-center text-center mt-2 md:mt-4">
+          <RevealOnScroll>
+            <img
+              src="/photo_profil.png"
+              alt="Portrait d'Ibrahim Samake"
+              className="mb-6 h-44 w-44 md:h-52 md:w-52 rounded-full border-2 border-[#D4AF37]/60 object-cover shadow-[0_0_35px_rgba(212,175,55,0.16)]"
+            />
+          </RevealOnScroll>
+
           <RevealOnScroll>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/5 text-xs font-medium text-[#D4AF37] mb-8 tracking-widest uppercase">
               <Zap size={14} className="animate-pulse" />
@@ -139,7 +145,7 @@ export default function App() {
             </p>
           </RevealOnScroll>
 
-          <RevealOnScroll delay={300} className="w-full mt-12 grid grid-cols-3 gap-4 border-y border-zinc-800/50 py-8">
+          <RevealOnScroll delay={300} className="w-full mt-8 grid grid-cols-3 gap-4 border-y border-zinc-800/50 py-6 md:py-8">
             <div className="flex flex-col items-center justify-center gap-1">
               <span className="text-[#D4AF37] text-xs font-semibold uppercase tracking-widest">Projets</span>
               <span className="text-xl md:text-2xl font-semibold text-white">3+</span>
@@ -155,7 +161,7 @@ export default function App() {
           </RevealOnScroll>
         </section>
 
-        <section className="flex flex-col items-center text-center">
+        <section id="vision" className="flex flex-col items-center text-center">
           <RevealOnScroll>
             <h2 className="font-serif text-3xl md:text-4xl text-white italic mb-2">Vision Stratégique</h2>
             <div className="h-0.5 w-12 bg-[#D4AF37] mx-auto mb-8 rounded-full" />
@@ -178,7 +184,7 @@ export default function App() {
           </RevealOnScroll>
         </section>
 
-        <section>
+        <section id="experience">
           <RevealOnScroll>
             <h2 className="font-serif text-3xl md:text-4xl text-white italic mb-2">
               Expériences <span className="text-white font-sans not-italic font-bold">Majeures</span>
@@ -249,7 +255,7 @@ export default function App() {
           </div>
         </section>
 
-        <section>
+        <section id="tech">
           <RevealOnScroll className="text-center md:text-left">
             <h2 className="font-serif text-3xl md:text-4xl text-white italic mb-2">
               Arsenal <span className="text-[#D4AF37] font-sans not-italic font-bold">Tech</span>
@@ -300,7 +306,7 @@ export default function App() {
           </div>
         </section>
 
-        <section>
+        <section id="education">
           <RevealOnScroll>
             <h2 className="font-serif text-3xl md:text-4xl text-white italic mb-2">
               Parcours <span className="text-white font-sans not-italic font-bold">Académique</span>
@@ -331,7 +337,7 @@ export default function App() {
           </RevealOnScroll>
         </section>
 
-        <section className="mt-10 mb-20 text-center bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-10 relative overflow-hidden">
+        <section id="contact" className="mt-10 mb-20 text-center bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-10 relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-[#D4AF37]/5 blur-[100px] rounded-full pointer-events-none" />
 
           <RevealOnScroll>
@@ -346,7 +352,7 @@ export default function App() {
                 href="https://drive.google.com/uc?export=download&id=1JU8B0R8_AeArCpqi9oh0522vCaBginXR"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full md:w-auto bg-white text-black hover:bg-gray-100 font-semibold py-3 px-8 rounded-full flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                className="w-full md:w-auto bg-white text-black hover:bg-gray-100 font-semibold py-3 px-8 rounded-full flex items-center justify-center gap-2 transition-all shadow-[0_0_12px_rgba(0,0,0,0.5)] btn-focus"
                 >
                 Télécharger CV PDF <Download size={18} />
               </a>
@@ -368,6 +374,10 @@ export default function App() {
             </a>
           </RevealOnScroll>
         </section>
+
+        <footer role="contentinfo" className="max-w-4xl mx-auto px-6 pb-12 text-center text-sm text-zinc-500">
+          © {new Date().getFullYear()} Ibrahim Samake — Tous droits réservés.
+        </footer>
       </main>
     </div>
   );
