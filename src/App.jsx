@@ -137,7 +137,7 @@ export default function App() {
 
           <RevealOnScroll delay={200}>
             <p className="text-zinc-400 text-sm md:text-base max-w-xl leading-relaxed mx-auto font-light">
-              Étudiant en Licence 1 — Mathématiques Appliquées & Informatique
+              Étudiant en Licence 2 — Mathématiques Appliquées & Informatique
               <br />
               <span className="text-[#D4AF37] font-medium mt-1 inline-block">
                 Développeur Scientific Computing & Frontend Engineer
