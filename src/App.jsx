@@ -320,7 +320,7 @@ export default function App() {
                 <GraduationCap className="text-[#D4AF37]" size={24} />
               </div>
               <div>
-                <h3 className="text-white font-bold text-lg">Licence 1 — Mathématiques Appliquées & Informatique</h3>
+                <h3 className="text-white font-bold text-lg">Licence 2 — Mathématiques Appliquées & Informatique</h3>
                 <p className="text-zinc-400 text-sm mt-1 mb-2">Faculté d'Informatique et de Technologie - KUBSU</p>
                 <span className="inline-block px-3 py-1 bg-zinc-800/50 text-xs font-medium text-[#D4AF37] rounded-md border border-zinc-700/50">
                   2025 — Présent
