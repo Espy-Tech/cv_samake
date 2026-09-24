@@ -10,8 +10,14 @@ import {
   Mail,
   Github,
   Linkedin,
+  Youtube,
+  Code,
   Zap,
+  Newspaper,
+  Lightbulb,
+  MessageCircle,
 } from 'lucide-react';
+import PublicationsSection from './components/PublicationsSection';
 
 const CustomStyles = () => (
   <style dangerouslySetInnerHTML={{ __html: `
@@ -27,7 +33,10 @@ const CustomStyles = () => (
     html { scroll-behavior: smooth; }
 
     body {
-      background-color: var(--bg-dark);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(212,175,55,0.14), transparent 22%),
+        radial-gradient(circle at 85% 15%, rgba(96,165,250,0.10), transparent 18%),
+        linear-gradient(180deg, #050608 0%, #0a0a0c 32%, #08090b 100%);
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
       -webkit-font-smoothing: antialiased;
@@ -35,10 +44,352 @@ const CustomStyles = () => (
       min-height: 100vh;
     }
 
+    .page-shell {
+      position: relative;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(7,8,10,0.82), rgba(10,10,12,0.94)),
+        radial-gradient(circle at center, rgba(212,175,55,0.06), transparent 45%);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .page-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+        radial-gradient(circle at center, rgba(255,255,255,0.04), transparent 60%);
+      background-size: 28px 28px, 28px 28px, 100% 100%;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    .page-shell::after {
+      content: '';
+      position: absolute;
+      inset: 10% 8% auto 8%;
+      height: 55%;
+      background: radial-gradient(circle at center, rgba(212,175,55,0.08), transparent 55%);
+      filter: blur(40px);
+      pointer-events: none;
+    }
+
+    .page-shell > * {
+      position: relative;
+      z-index: 1;
+    }
+
     .font-serif { font-family: 'Playfair Display', serif; }
 
     .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
     .reveal.active { opacity: 1; transform: translateY(0); }
+
+    .stack-marquee-wrap {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(90deg, rgba(10,10,12,0.9), rgba(18,18,20,0.8), rgba(10,10,12,0.9));
+      box-shadow: inset 0 0 30px rgba(212,175,55,0.04);
+    }
+
+    .stack-marquee-track {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: max-content;
+      padding: 1rem 0;
+      white-space: nowrap;
+      animation: stack-marquee 22s linear infinite;
+    }
+
+    .stack-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 9999px;
+      padding: 0.8rem 1.1rem;
+      color: #e5e7eb;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      flex-shrink: 0;
+    }
+
+    .stack-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 0.8rem;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      box-shadow: inset 0 0 12px rgba(255,255,255,0.04);
+      flex-shrink: 0;
+    }
+
+    .stack-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 0.3rem;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.12));
+    }
+
+    .mini-stat {
+      position: relative;
+      min-height: 96px;
+      padding: 0.9rem 1rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(12,12,14,0.7);
+      overflow: hidden;
+    }
+
+    .mini-stat::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(212,175,55,0.03), transparent 35%, transparent 65%, rgba(212,175,55,0.03));
+      pointer-events: none;
+    }
+
+    .mini-stat:not(:last-child) {
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .profile-orb {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(190px, 27vw, 260px);
+      height: clamp(190px, 27vw, 260px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,175,55,0.32), rgba(212,175,55,0.1) 35%, rgba(255,255,255,0.02) 70%, transparent 100%);
+      box-shadow: 0 0 36px rgba(212,175,55,0.18);
+      padding: 0.8rem;
+      border: 0;
+      overflow: hidden;
+    }
+
+    .profile-orb::before {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(212,175,55,0.35);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .profile-orb::after {
+      content: '';
+      position: absolute;
+      inset: 24px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50%;
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    .profile-orb img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 2px solid rgba(212,175,55,0.5);
+      object-fit: cover;
+      object-position: center 28%;
+      background: #f7f7f5;
+      box-shadow: inset 0 0 25px rgba(0,0,0,0.22);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.65rem 1.15rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(212,175,55,0.42);
+      background: linear-gradient(90deg, rgba(212,175,55,0.08), rgba(212,175,55,0.02), rgba(212,175,55,0.08));
+      box-shadow: inset 0 0 18px rgba(212,175,55,0.08), 0 10px 26px rgba(0,0,0,0.18);
+      color: #f0c86a;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+    }
+
+    .hero-name {
+      font-size: clamp(2.4rem, 4vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .hero-name .gold {
+      color: var(--gold);
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .hero-name .white {
+      color: #f5f5f5;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+    }
+
+    .hero-subtitle {
+      display: inline-block;
+      margin-top: 0.7rem;
+      font-size: clamp(0.92rem, 1.25vw, 1.15rem);
+      color: rgba(255,255,255,0.8);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .hero-subtitle strong {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .stack-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.55rem;
+      margin-top: 0.7rem;
+    }
+
+    .stack-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 0.7rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(212,175,55,0.28);
+      background: rgba(212,175,55,0.06);
+      color: #f5f5f5;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .cert-card {
+      background: rgba(18,18,20,0.8);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1.25rem;
+      padding: 1.4rem;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.12);
+    }
+
+    .cert-card:hover {
+      border-color: rgba(212,175,55,0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(212,175,55,0.08);
+    }
+
+    .publication-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 250px;
+      padding: 1.4rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1rem;
+      background: linear-gradient(145deg, rgba(20,20,22,0.9), rgba(12,12,14,0.72));
+      box-shadow: 0 18px 30px rgba(0,0,0,0.12);
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .publication-card:hover {
+      border-color: rgba(212,175,55,0.45);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 36px rgba(212,175,55,0.08);
+    }
+
+    .publication-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      margin-bottom: 1.1rem;
+      border: 1px solid rgba(212,175,55,0.28);
+      border-radius: 0.75rem;
+      color: var(--gold);
+      background: rgba(212,175,55,0.08);
+    }
+
+    .publication-meta {
+      color: #c7a43a;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .publication-content p { margin: 0 0 1.15rem; }
+    .publication-content h2, .publication-content h3 {
+      margin: 1.6rem 0 0.8rem;
+      color: #fff;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .publication-content ul, .publication-content ol {
+      margin: 0 0 1.15rem 1.25rem;
+      padding-left: 1rem;
+    }
+    .publication-content ul { list-style: disc; }
+    .publication-content ol { list-style: decimal; }
+    .publication-content img {
+      display: block;
+      width: 100%;
+      max-height: 28rem;
+      margin: 1.5rem 0;
+      border-radius: 0.85rem;
+      object-fit: contain;
+      background: rgba(0,0,0,0.22);
+    }
+
+    .cert-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 9999px;
+      background: rgba(212,175,55,0.08);
+      border: 1px solid rgba(212,175,55,0.24);
+      color: #f0c86a;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    @keyframes stack-marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
 
     .timeline-line { position: absolute; left: 11px; top: 24px; bottom: 0; width: 1px; background: linear-gradient(to bottom, var(--gold) 0%, transparent 100%); opacity: 0.3; }
 
@@ -54,6 +405,35 @@ const CustomStyles = () => (
     ::-webkit-scrollbar-track { background: var(--bg-dark); }
     ::-webkit-scrollbar-thumb { background: #2b2b2b; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    @media (max-width: 768px) {
+      .profile-orb {
+        width: min(62vw, 230px);
+        height: min(62vw, 230px);
+      }
+
+      .mini-stat {
+        min-height: 84px;
+        padding: 0.8rem 0.9rem;
+      }
+
+      .mini-stat:not(:last-child) {
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .stack-badge {
+        gap: 0.6rem;
+        padding: 0.7rem 0.9rem;
+        font-size: 0.62rem;
+        letter-spacing: 0.06em;
+      }
+
+      .stack-icon {
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+    }
 
     @media (prefers-reduced-motion: reduce) {
       .reveal { transition: none !important; transform: none !important; }
@@ -93,73 +473,113 @@ const RevealOnScroll = ({ children, className = '', delay = 0 }) => {
   );
 };
 
+const stackItems = [
+  { name: 'C++', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg' },
+  { name: 'Java', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
+  { name: 'Python', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+  { name: 'HTML', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg' },
+  { name: 'CSS', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg' },
+  { name: 'JavaScript', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
+];
+
+const TechMarquee = () => {
+  const duplicatedItems = [...stackItems, ...stackItems];
+
+  return (
+    <div className="stack-marquee-wrap" aria-label="Technologies maîtrisées">
+      <div className="stack-marquee-track">
+        {duplicatedItems.map((item, index) => (
+          <div key={`${item.name}-${index}`} className="stack-badge">
+            <span className="stack-icon">
+              <img src={item.logo} alt={`${item.name} logo`} />
+            </span>
+            <span>{item.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   const handlePrint = () => {
     window.print();
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0c] text-zinc-300 selection:bg-[#D4AF37] selection:text-black">
+    <div className="page-shell min-h-screen text-zinc-300 selection:bg-[#D4AF37] selection:text-black">
       <CustomStyles />
 
       <header role="banner" className="max-w-5xl mx-auto px-6 py-4 md:py-6 flex items-center justify-between">
         <a href="#home" className="text-white font-serif text-lg">Ibrahim <span className="text-[#D4AF37]">Samake</span></a>
         <nav aria-label="Navigation principale" className="hidden sm:flex items-center gap-4 text-sm text-zinc-400">
           <a href="#experience" className="hover:text-white">Projets</a>
+          <a href="#publications" className="hover:text-white">Publications</a>
           <a href="#education" className="hover:text-white">Parcours</a>
           <a href="#contact" className="hover:text-white">Contact</a>
         </nav>
       </header>
 
       <main id="main" role="main" className="max-w-4xl mx-auto px-6 py-6 md:py-8 flex flex-col gap-20">
-        <section id="home" className="flex flex-col items-center text-center mt-2 md:mt-4">
+        <section id="home" className="flex flex-col items-center text-center mt-0 md:mt-1">
           <RevealOnScroll>
-            <img
-              src="/photo_profil.png"
-              alt="Portrait d'Ibrahim Samake"
-              className="mb-6 h-44 w-44 md:h-52 md:w-52 rounded-full border-2 border-[#D4AF37]/60 object-cover shadow-[0_0_35px_rgba(212,175,55,0.16)]"
-            />
+            <div className="profile-orb mb-4">
+              <img
+                src="/photo_profil.png"
+                alt="Portrait d'Ibrahim Samake"
+                className=""
+              />
+            </div>
           </RevealOnScroll>
 
           <RevealOnScroll>
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/5 text-xs font-medium text-[#D4AF37] mb-8 tracking-widest uppercase">
+            <div className="hero-badge mb-5">
               <Zap size={14} className="animate-pulse" />
               Disponible pour de nouveaux défis
             </div>
           </RevealOnScroll>
 
           <RevealOnScroll delay={100}>
-            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-4">
-              <span className="font-serif text-[#D4AF37]">Ibrahim</span>{' '}
-              <span className="font-sans text-white/90">Samake</span>
+            <h1 className="hero-name mb-3">
+              <span className="gold">Ibrahim</span>{' '}
+              <span className="white">Samake</span>
             </h1>
           </RevealOnScroll>
 
           <RevealOnScroll delay={200}>
-            <p className="text-zinc-400 text-sm md:text-base max-w-xl leading-relaxed mx-auto font-light">
-              Étudiant en Licence 2 — Mathématiques Appliquées & Informatique
+            <p className="hero-subtitle max-w-3xl mx-auto">
+              Étudiant en Licence — <strong>Mathématiques Appliquées & Informatique</strong>
               <br />
-              <span className="text-[#D4AF37] font-medium mt-1 inline-block">
-                Développeur Scientific Computing & Frontend Engineer
-              </span>
+              <span className="text-[#D4AF37] font-semibold">Scientific Computing Developer & Frontend Engineer</span>
             </p>
           </RevealOnScroll>
 
-          <RevealOnScroll delay={300} className="w-full mt-8 grid grid-cols-3 gap-4 border-y border-zinc-800/50 py-6 md:py-8">
-            <div className="flex flex-col items-center justify-center gap-1">
-              <span className="text-[#D4AF37] text-xs font-semibold uppercase tracking-widest">Projets</span>
-              <span className="text-xl md:text-2xl font-semibold text-white">3+</span>
+          <RevealOnScroll delay={300} className="w-full mt-5 grid grid-cols-1 md:grid-cols-3 overflow-hidden border-y border-zinc-800/60">
+            <div className="mini-stat flex flex-col items-center justify-center text-center">
+              <span className="text-[#D4AF37] text-xs md:text-sm font-semibold uppercase tracking-[0.25em]">Projets</span>
+              <span className="mt-3 text-3xl md:text-5xl font-bold text-white">3+</span>
             </div>
-            <div className="flex flex-col items-center justify-center gap-1 border-x border-zinc-800/50">
-              <span className="text-[#D4AF37] text-xs font-semibold uppercase tracking-widest">Stack</span>
-              <span className="text-xl md:text-2xl font-semibold text-white">C++ / JS</span>
+
+            <div className="mini-stat flex flex-col items-center justify-center text-center">
+              <span className="text-[#D4AF37] text-xs md:text-sm font-semibold uppercase tracking-[0.25em]">Stack</span>
+              <div className="stack-pills">
+                <span className="stack-pill">C++</span>
+                <span className="stack-pill">JS</span>
+                <span className="stack-pill">Python</span>
+                <span className="stack-pill">Java</span>
+              </div>
             </div>
-            <div className="flex flex-col items-center justify-center gap-1">
-              <span className="text-[#D4AF37] text-xs font-semibold uppercase tracking-widest">Base</span>
-              <span className="text-lg md:text-xl font-semibold text-white">Krasnodar</span>
+
+            <div className="mini-stat flex flex-col items-center justify-center text-center">
+              <span className="text-[#D4AF37] text-xs md:text-sm font-semibold uppercase tracking-[0.25em]">Base</span>
+              <span className="mt-3 text-2xl md:text-4xl font-semibold text-white">Krasnodar</span>
             </div>
           </RevealOnScroll>
         </section>
+
+        <RevealOnScroll delay={100}>
+          <TechMarquee />
+        </RevealOnScroll>
 
         <section id="vision" className="flex flex-col items-center text-center">
           <RevealOnScroll>
@@ -183,6 +603,8 @@ export default function App() {
             </p>
           </RevealOnScroll>
         </section>
+
+        <PublicationsSection />
 
         <section id="experience">
           <RevealOnScroll>
@@ -299,7 +721,7 @@ export default function App() {
                 <Globe2 className="text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform" size={28} />
                 <h3 className="text-white font-bold text-lg mb-2">Soft Skills</h3>
                 <p className="text-zinc-400 text-sm font-light leading-relaxed">
-                  Français (Excellent), Russe (Courant), Anglais (Pro). Vision scientifique, résolution de problèmes complexe.
+                   Bambara (maternelle),Français (Excellent), Russe (Courant), Anglais (Pro). Vision scientifique, résolution de problèmes complexe.
                 </p>
               </div>
             </RevealOnScroll>
@@ -320,7 +742,7 @@ export default function App() {
                 <GraduationCap className="text-[#D4AF37]" size={24} />
               </div>
               <div>
-                <h3 className="text-white font-bold text-lg">Licence 2 — Mathématiques Appliquées & Informatique</h3>
+                <h3 className="text-white font-bold text-lg">Licence — Mathématiques Appliquées & Informatique</h3>
                 <p className="text-zinc-400 text-sm mt-1 mb-2">Faculté d'Informatique et de Technologie - KUBSU</p>
                 <span className="inline-block px-3 py-1 bg-zinc-800/50 text-xs font-medium text-[#D4AF37] rounded-md border border-zinc-700/50">
                   2025 — Présent
@@ -366,11 +788,17 @@ export default function App() {
           </RevealOnScroll>
 
           <RevealOnScroll delay={300} className="flex items-center justify-center gap-6 mt-12 pt-8 border-t border-zinc-800/50 relative z-10">
-            <a href="https://github.com/Espy-Tech" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors">
+            <a href="https://github.com/Espy-Tech" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors" aria-label="GitHub">
               <Github size={24} />
             </a>
-            <a href="https://www.linkedin.com/in/ibrahim-samake-18629038b/" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-[#D4AF37] transition-colors">
+            <a href="https://www.linkedin.com/in/ibrahim-samake-18629038b/" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-[#D4AF37] transition-colors" aria-label="LinkedIn">
               <Linkedin size={24} />
+            </a>
+            <a href="https://www.youtube.com/@Espy-tech" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-red-500 transition-colors" aria-label="YouTube">
+              <Youtube size={24} />
+            </a>
+            <a href="https://leetcode.com/u/espy09/" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-[#D4AF37] transition-colors" aria-label="LeetCode">
+              <Code size={24} />
             </a>
           </RevealOnScroll>
         </section>
