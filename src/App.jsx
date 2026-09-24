@@ -469,7 +469,21 @@ const CustomStyles = () => (
       text-transform: uppercase;
     }
 
+    .publication-content {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
     .publication-content p { margin: 0 0 1.15rem; }
+    .publication-content a {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .publication-content pre {
+      max-width: 100%;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
     .publication-content h2, .publication-content h3 {
       margin: 1.6rem 0 0.8rem;
       color: #fff;
@@ -484,12 +498,33 @@ const CustomStyles = () => (
     .publication-content ol { list-style: decimal; }
     .publication-content img {
       display: block;
-      width: 100%;
+      max-width: 100%;
+      width: auto;
       max-height: 28rem;
       margin: 1.5rem 0;
       border-radius: 0.85rem;
       object-fit: contain;
       background: rgba(0,0,0,0.22);
+    }
+    .publication-editor {
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .publication-editor img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+    .publication-editor a {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .publication-editor pre {
+      max-width: 100%;
+      overflow-x: auto;
+      white-space: pre-wrap;
     }
 
     .cert-badge {

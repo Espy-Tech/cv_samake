@@ -109,13 +109,13 @@ function RichTextEditor({ value, onChange, onImageUpload }) {
 
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 focus-within:border-[#D4AF37]">
-      <div className="flex min-w-max gap-1 overflow-x-auto border-b border-zinc-700 p-2">
-        <button type="button" onClick={() => runCommand('bold')} className="rounded-md p-3 text-white hover:bg-zinc-700" aria-label="Gras"><Bold size={17} /></button>
-        <button type="button" onClick={() => runCommand('italic')} className="rounded-md p-3 text-white hover:bg-zinc-700" aria-label="Italique"><Italic size={17} /></button>
-        <button type="button" onClick={() => runCommand('underline')} className="rounded-md p-3 text-white hover:bg-zinc-700" aria-label="Souligné"><Underline size={17} /></button>
-        <button type="button" onClick={() => runCommand('formatBlock', 'h2')} className="rounded-md px-3 py-2 text-sm font-bold text-white hover:bg-zinc-700">Titre</button>
-        <button type="button" onClick={() => runCommand('insertUnorderedList')} className="rounded-md px-3 py-2 text-sm text-white hover:bg-zinc-700">Liste</button>
-        <label className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-white hover:bg-zinc-700">
+      <div className="flex flex-wrap items-center gap-1 overflow-hidden border-b border-zinc-700 p-2">
+        <button type="button" onClick={() => runCommand('bold')} className="rounded-md p-2.5 text-white hover:bg-zinc-700" aria-label="Gras"><Bold size={17} /></button>
+        <button type="button" onClick={() => runCommand('italic')} className="rounded-md p-2.5 text-white hover:bg-zinc-700" aria-label="Italique"><Italic size={17} /></button>
+        <button type="button" onClick={() => runCommand('underline')} className="rounded-md p-2.5 text-white hover:bg-zinc-700" aria-label="Souligné"><Underline size={17} /></button>
+        <button type="button" onClick={() => runCommand('formatBlock', 'h2')} className="rounded-md px-2.5 py-2 text-sm font-bold text-white hover:bg-zinc-700">Titre</button>
+        <button type="button" onClick={() => runCommand('insertUnorderedList')} className="rounded-md px-2.5 py-2 text-sm text-white hover:bg-zinc-700">Liste</button>
+        <label className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-2 text-sm text-white hover:bg-zinc-700">
           <ImagePlus size={17} /> Image
           <input type="file" accept="image/*" onChange={handleImage} className="hidden" />
         </label>
@@ -126,7 +126,7 @@ function RichTextEditor({ value, onChange, onImageUpload }) {
         role="textbox"
         aria-multiline="true"
         onInput={(event) => onChange(event.currentTarget.innerHTML)}
-        className="min-h-48 px-4 py-3 text-sm leading-7 text-white outline-none empty:before:text-zinc-500 empty:before:content-['Écrivez_votre_publication...']"
+        className="publication-editor min-h-48 px-4 py-3 text-sm leading-7 text-white outline-none empty:before:text-zinc-500 empty:before:content-['Écrivez_votre_publication...']"
       />
     </div>
   );
