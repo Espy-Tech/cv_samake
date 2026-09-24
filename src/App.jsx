@@ -257,6 +257,10 @@ const CustomStyles = () => (
       display: none;
     }
 
+    #vision {
+      margin-top: 5rem;
+    }
+
     .profile-orb {
       position: relative;
       display: inline-flex;
