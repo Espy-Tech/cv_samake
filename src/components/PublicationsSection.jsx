@@ -145,6 +145,7 @@ export default function PublicationsSection() {
   const [message, setMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured);
+  const [isMobile, setIsMobile] = useState(false);
   const isAdmin = session?.user?.app_metadata?.role === 'admin';
 
   const loadPublications = async () => {
@@ -169,6 +170,14 @@ export default function PublicationsSection() {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
     return () => listener.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const updateViewport = () => setIsMobile(mediaQuery.matches);
+    updateViewport();
+    mediaQuery.addEventListener('change', updateViewport);
+    return () => mediaQuery.removeEventListener('change', updateViewport);
   }, []);
 
   const handleLogin = async (event) => {
@@ -288,7 +297,30 @@ export default function PublicationsSection() {
     await loadPublications();
   };
 
-  const visiblePublications = showAll ? publications : publications.slice(0, 3);
+  const featuredPublications = showAll
+    ? publications
+    : publications.slice(0, isMobile ? 1 : 3);
+  const additionalPublications = publications.slice(3);
+
+  const renderPublicationCard = (publication) => {
+    const Icon = categoryIcons[publication.category] || BookOpen;
+    return (
+      <article key={publication.id} className="publication-card overflow-hidden">
+        {publication.thumbnail_url && (
+          <div className="-mx-5 -mt-5 mb-5 aspect-video overflow-hidden bg-zinc-900">
+            <img src={publication.thumbnail_url} alt="" className="h-full w-full object-cover object-center" />
+          </div>
+        )}
+        <span className="publication-icon"><Icon size={20} /></span>
+        <span className="publication-meta">{publication.category}</span>
+        <h3 className="text-white text-lg font-bold mt-2 mb-3">{publication.title}</h3>
+        <p className="text-zinc-400 text-sm leading-relaxed font-light">{publication.excerpt}</p>
+        <button type="button" onClick={() => setSelectedPublication(publication)} className="mt-auto pt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#D4AF37] hover:text-white transition-colors w-fit">
+          Lire la publication <ArrowRight size={16} />
+        </button>
+      </article>
+    );
+  };
 
   return (
     <section id="publications">
@@ -298,7 +330,7 @@ export default function PublicationsSection() {
         </h2>
         <div className="h-0.5 w-12 bg-[#D4AF37] mb-4 rounded-full" />
         <p className="text-zinc-400 text-sm leading-relaxed max-w-2xl font-light">
-          Les trois dernières réflexions sur l’actualité technologique, le développement logiciel et les problèmes que j’explore.
+          Les dernières réflexions sur l’actualité technologique, le développement logiciel et les problèmes que j’explore.
         </p>
       </div>
 
@@ -310,30 +342,21 @@ export default function PublicationsSection() {
         <p className="mt-8 text-sm text-zinc-400">Chargement des publications...</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-          {visiblePublications.map((publication) => {
-          const Icon = categoryIcons[publication.category] || BookOpen;
-          return (
-            <article key={publication.id} className="publication-card overflow-hidden">
-              {publication.thumbnail_url && (
-                <div className="-mx-5 -mt-5 mb-5 aspect-video overflow-hidden bg-zinc-900">
-                  <img src={publication.thumbnail_url} alt="" className="h-full w-full object-cover object-center" />
-                </div>
-              )}
-              <span className="publication-icon"><Icon size={20} /></span>
-              <span className="publication-meta">{publication.category}</span>
-              <h3 className="text-white text-lg font-bold mt-2 mb-3">{publication.title}</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed font-light">{publication.excerpt}</p>
-              <button type="button" onClick={() => setSelectedPublication(publication)} className="mt-auto pt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#D4AF37] hover:text-white transition-colors w-fit">
-                Lire la publication <ArrowRight size={16} />
-              </button>
-            </article>
-          );
-          })}
+          {featuredPublications.map(renderPublicationCard)}
         </div>
       )}
 
-      {publications.length > 3 && (
-        <button type="button" onClick={() => setShowAll(!showAll)} className="mt-8 mx-auto flex items-center gap-2 rounded-full border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-white hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors">
+      {!isMobile && !showAll && additionalPublications.length > 0 && (
+        <div className="publication-marquee mt-4" aria-label="Autres publications">
+          <div className="publication-marquee-track">
+            {additionalPublications.map(renderPublicationCard)}
+            {additionalPublications.map((publication) => renderPublicationCard({ ...publication, id: `${publication.id}-duplicate` }))}
+          </div>
+        </div>
+      )}
+
+      {isMobile && publications.length > 1 && (
+        <button type="button" onClick={() => setShowAll(!showAll)} className="publication-more-button mt-8 mx-auto flex items-center gap-2 rounded-full border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-white hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors">
           {showAll ? 'Réduire les publications' : 'Voir plus de publications'} <ArrowRight size={16} />
         </button>
       )}

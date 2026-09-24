@@ -411,6 +411,35 @@ const CustomStyles = () => (
       box-shadow: 0 20px 36px rgba(212,175,55,0.08);
     }
 
+    .publication-marquee {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    }
+
+    .publication-marquee-track {
+      display: flex;
+      width: max-content;
+      gap: 1rem;
+      animation: publication-marquee 34s linear infinite;
+    }
+
+    .publication-marquee .publication-card {
+      width: min(28rem, calc((100vw - 4rem) / 3));
+      min-height: 250px;
+      flex: 0 0 min(28rem, calc((100vw - 4rem) / 3));
+    }
+
+    .publication-more-button {
+      display: none;
+    }
+
+    @keyframes publication-marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
     .publication-icon {
       display: inline-flex;
       align-items: center;
@@ -565,11 +594,20 @@ const CustomStyles = () => (
         width: 1.8rem;
         height: 1.8rem;
       }
+
+      .publication-marquee {
+        display: none;
+      }
+
+      .publication-more-button {
+        display: flex;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .reveal { transition: none !important; transform: none !important; }
       .stack-marquee-track { animation: none !important; }
+      .publication-marquee-track { animation: none !important; }
     }
   ` }} />
 );
