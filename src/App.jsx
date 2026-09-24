@@ -85,6 +85,19 @@ const CustomStyles = () => (
 
     .font-serif { font-family: 'Playfair Display', serif; }
 
+    .vision-copy {
+      text-wrap: pretty;
+      color: rgba(161, 161, 170, 0.88);
+    }
+
+    .vision-copy strong {
+      color: rgba(212, 212, 216, 0.92);
+    }
+
+    .vision-copy .text-\[\#D4AF37\] {
+      color: rgba(190, 151, 42, 0.9);
+    }
+
     .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
     .reveal.active { opacity: 1; transform: translateY(0); }
 
@@ -98,14 +111,50 @@ const CustomStyles = () => (
       box-shadow: inset 0 0 30px rgba(212,175,55,0.04);
     }
 
+    .tech-marquee-separator {
+      width: 100%;
+      max-width: 100%;
+      margin-left: 0;
+      transform: none;
+      overflow: hidden;
+    }
+
+    .stack-marquee-wrap::before,
+    .stack-marquee-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      z-index: 2;
+      width: clamp(5rem, 22vw, 18rem);
+      pointer-events: none;
+    }
+
+    .stack-marquee-wrap::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(10,10,12,0.98) 0%, rgba(10,10,12,0.78) 22%, rgba(10,10,12,0.35) 58%, rgba(10,10,12,0) 100%);
+    }
+
+    .stack-marquee-wrap::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(10,10,12,0.98) 0%, rgba(10,10,12,0.78) 22%, rgba(10,10,12,0.35) 58%, rgba(10,10,12,0) 100%);
+    }
+
     .stack-marquee-track {
       display: flex;
       align-items: center;
-      gap: 1rem;
       width: max-content;
       padding: 1rem 0;
       white-space: nowrap;
       animation: stack-marquee 22s linear infinite;
+    }
+
+    .stack-marquee-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding-right: 1rem;
+      flex-shrink: 0;
     }
 
     .stack-badge {
@@ -147,12 +196,47 @@ const CustomStyles = () => (
       filter: drop-shadow(0 0 8px rgba(255,255,255,0.12));
     }
 
+    .mini-stats-shell {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .mini-stats-shell::before,
+    .mini-stats-shell::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      z-index: 2;
+      width: clamp(2.5rem, 8vw, 7rem);
+      pointer-events: none;
+    }
+
+    .mini-stats-shell::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(10,10,12,0.98), rgba(10,10,12,0.65) 35%, rgba(10,10,12,0));
+    }
+
+    .mini-stats-shell::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(10,10,12,0.98), rgba(10,10,12,0.65) 35%, rgba(10,10,12,0));
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: 100%;
+      min-width: 0;
+    }
+
     .mini-stat {
       position: relative;
       min-height: 96px;
       padding: 0.9rem 1rem;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
       background: rgba(12,12,14,0.7);
       overflow: hidden;
     }
@@ -407,19 +491,67 @@ const CustomStyles = () => (
     ::-webkit-scrollbar-thumb:hover { background: #555; }
 
     @media (max-width: 768px) {
+      .vision-copy {
+        max-width: 34rem;
+        font-size: 0.9rem;
+        line-height: 1.75;
+        text-align: left;
+      }
+
       .profile-orb {
         width: min(62vw, 230px);
         height: min(62vw, 230px);
       }
 
       .mini-stat {
-        min-height: 84px;
-        padding: 0.8rem 0.9rem;
+        min-height: 72px;
+        padding: 0.5rem 0.2rem;
+        min-width: 0;
+      }
+
+      .mini-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
       }
 
       .mini-stat:not(:last-child) {
-        border-right: none;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
+        border-right: 1px solid rgba(255,255,255,0.08);
+        border-bottom: none;
+      }
+
+      .mini-stats-shell::before,
+      .mini-stats-shell::after {
+        width: 1rem;
+      }
+
+      .mini-stat > span:first-child {
+        font-size: 0.52rem;
+        letter-spacing: 0.12em;
+      }
+
+      .mini-stat > .text-3xl {
+        margin-top: 0.35rem;
+        font-size: 1.65rem;
+      }
+
+      .mini-stat > .text-2xl {
+        margin-top: 0.35rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      .stack-pills {
+        gap: 0.15rem;
+        margin-top: 0.3rem;
+      }
+
+      .stack-pill {
+        padding: 0.18rem 0.25rem;
+        font-size: 0.48rem;
+        letter-spacing: 0.02em;
       }
 
       .stack-badge {
@@ -437,6 +569,7 @@ const CustomStyles = () => (
 
     @media (prefers-reduced-motion: reduce) {
       .reveal { transition: none !important; transform: none !important; }
+      .stack-marquee-track { animation: none !important; }
     }
   ` }} />
 );
@@ -483,19 +616,24 @@ const stackItems = [
 ];
 
 const TechMarquee = () => {
-  const duplicatedItems = [...stackItems, ...stackItems];
+  const renderItems = (isDuplicate = false) => (
+    <div className="stack-marquee-group" aria-hidden={isDuplicate}>
+      {stackItems.map((item, index) => (
+        <div key={`${item.name}-${isDuplicate ? 'duplicate-' : ''}${index}`} className="stack-badge">
+          <span className="stack-icon">
+            <img src={item.logo} alt={`${item.name} logo`} />
+          </span>
+          <span>{item.name}</span>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="stack-marquee-wrap" aria-label="Technologies maîtrisées">
       <div className="stack-marquee-track">
-        {duplicatedItems.map((item, index) => (
-          <div key={`${item.name}-${index}`} className="stack-badge">
-            <span className="stack-icon">
-              <img src={item.logo} alt={`${item.name} logo`} />
-            </span>
-            <span>{item.name}</span>
-          </div>
-        ))}
+        {renderItems()}
+        {renderItems(true)}
       </div>
     </div>
   );
@@ -554,7 +692,8 @@ export default function App() {
             </p>
           </RevealOnScroll>
 
-          <RevealOnScroll delay={300} className="w-full mt-5 grid grid-cols-1 md:grid-cols-3 overflow-hidden border-y border-zinc-800/60">
+          <RevealOnScroll delay={300} className="mini-stats-shell mt-5">
+            <div className="mini-stats">
             <div className="mini-stat flex flex-col items-center justify-center text-center">
               <span className="text-[#D4AF37] text-xs md:text-sm font-semibold uppercase tracking-[0.25em]">Projets</span>
               <span className="mt-3 text-3xl md:text-5xl font-bold text-white">3+</span>
@@ -574,12 +713,14 @@ export default function App() {
               <span className="text-[#D4AF37] text-xs md:text-sm font-semibold uppercase tracking-[0.25em]">Base</span>
               <span className="mt-3 text-2xl md:text-4xl font-semibold text-white">Krasnodar</span>
             </div>
+            </div>
           </RevealOnScroll>
+
         </section>
 
-        <RevealOnScroll delay={100}>
+        <div className="tech-marquee-separator" aria-label="Technologies maîtrisées">
           <TechMarquee />
-        </RevealOnScroll>
+        </div>
 
         <section id="vision" className="flex flex-col items-center text-center">
           <RevealOnScroll>
@@ -588,7 +729,7 @@ export default function App() {
           </RevealOnScroll>
 
           <RevealOnScroll delay={150}>
-            <p className="text-zinc-300 text-sm md:text-base leading-loose max-w-2xl font-light text-justify md:text-center">
+            <p className="vision-copy text-zinc-300 text-sm md:text-base leading-loose max-w-2xl font-light text-left md:text-center">
               Étudiant ambitieux à la{' '}
               <span className="text-white font-medium">
                 Faculté d'Informatique et de Technologie de l'Université d'État de Kouban (KUBSU)
