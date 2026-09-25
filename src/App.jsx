@@ -17,6 +17,7 @@ import {
   Lightbulb,
   MessageCircle,
 } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import PublicationsSection from './components/PublicationsSection';
 
 const CustomStyles = () => (
@@ -1029,6 +1030,7 @@ export default function App() {
           © {new Date().getFullYear()} Ibrahim Samake — Tous droits réservés.
         </footer>
       </main>
+      <Analytics />
     </div>
   );
 }
