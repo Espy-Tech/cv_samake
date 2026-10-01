@@ -84,6 +84,33 @@ const formatContent = (content) => content.includes('<')
   ? sanitizeContent(content)
   : content.split(/\n\s*\n/).map((paragraph) => `<p>${paragraph.trim()}</p>`).filter(Boolean).join('');
 
+const optimizeImage = async (file) => {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('Sélectionne un fichier image valide.');
+  }
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const context = canvas.getContext('2d');
+  if (!context) {
+    bitmap.close();
+    throw new Error('La compression de cette image n’est pas disponible dans ce navigateur.');
+  }
+
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error('Impossible de compresser cette image.'));
+    }, 'image/webp', 0.82);
+  });
+};
+
 function RichTextEditor({ value, onChange, onImageUpload }) {
   const editorRef = useRef(null);
 
@@ -108,7 +135,7 @@ function RichTextEditor({ value, onChange, onImageUpload }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 focus-within:border-[#D4AF37]">
+    <div className="overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 focus-within:border-[#D4AF37] focus-within:ring-2 focus-within:ring-[#D4AF37]/60">
       <div className="flex flex-wrap items-center gap-1 overflow-hidden border-b border-zinc-700 p-2">
         <button type="button" onClick={() => runCommand('bold')} className="rounded-md p-2.5 text-white hover:bg-zinc-700" aria-label="Gras"><Bold size={17} /></button>
         <button type="button" onClick={() => runCommand('italic')} className="rounded-md p-2.5 text-white hover:bg-zinc-700" aria-label="Italique"><Italic size={17} /></button>
@@ -125,8 +152,9 @@ function RichTextEditor({ value, onChange, onImageUpload }) {
         contentEditable
         role="textbox"
         aria-multiline="true"
+        aria-label="Contenu de la publication"
         onInput={(event) => onChange(event.currentTarget.innerHTML)}
-        className="publication-editor min-h-48 px-4 py-3 text-sm leading-7 text-white outline-none empty:before:text-zinc-500 empty:before:content-['Écrivez_votre_publication...']"
+        className="publication-editor min-h-48 px-4 py-3 text-sm leading-7 text-white outline-none empty:before:text-zinc-500 empty:before:content-['Écrivez_votre_publication…']"
       />
     </div>
   );
@@ -136,6 +164,7 @@ export default function PublicationsSection() {
   const [publications, setPublications] = useState(isSupabaseConfigured ? [] : demoPublications);
   const [selectedPublication, setSelectedPublication] = useState(null);
   const [showAll, setShowAll] = useState(false);
+  const [isMarqueePaused, setIsMarqueePaused] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [session, setSession] = useState(null);
   const [login, setLogin] = useState({ email: '', password: '' });
@@ -198,16 +227,24 @@ export default function PublicationsSection() {
 
   const uploadPublicationImage = async (file) => {
     if (!supabase || !isAdmin) return null;
-    const filePath = `content-${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '-')}`;
-    const { error } = await supabase.storage.from('publication-thumbnails').upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false,
-    });
-    if (error) {
-      setMessage(`Impossible d'envoyer l'image : ${error.message}`);
+    try {
+      const optimizedImage = await optimizeImage(file);
+      const filePath = `content-${crypto.randomUUID()}.webp`;
+      const { error } = await supabase.storage.from('publication-thumbnails').upload(filePath, optimizedImage, {
+        cacheControl: '3600',
+        contentType: 'image/webp',
+        upsert: false,
+      });
+      if (error) {
+        setMessage(`Impossible d'envoyer l'image : ${error.message}`);
+        return null;
+      }
+      setMessage('');
+      return supabase.storage.from('publication-thumbnails').getPublicUrl(filePath).data.publicUrl;
+    } catch (error) {
+      setMessage(`Impossible de préparer l'image : ${error.message}`);
       return null;
     }
-    return supabase.storage.from('publication-thumbnails').getPublicUrl(filePath).data.publicUrl;
   };
 
   const startEditing = (publication) => {
@@ -244,10 +281,15 @@ export default function PublicationsSection() {
 
     try {
       if (thumbnail) {
-        thumbnailPath = `${crypto.randomUUID()}-${thumbnail.name.replace(/[^a-zA-Z0-9.-]/g, '-')}`;
+        const optimizedThumbnail = await optimizeImage(thumbnail);
+        thumbnailPath = `${crypto.randomUUID()}.webp`;
         const { error: uploadError } = await supabase.storage
           .from('publication-thumbnails')
-          .upload(thumbnailPath, thumbnail, { cacheControl: '3600', upsert: false });
+          .upload(thumbnailPath, optimizedThumbnail, {
+            cacheControl: '3600',
+            contentType: 'image/webp',
+            upsert: false,
+          });
         if (uploadError) {
           setMessage(`Impossible d'envoyer la miniature : ${uploadError.message}`);
           return;
@@ -308,7 +350,7 @@ export default function PublicationsSection() {
       <article key={publication.id} className="publication-card overflow-hidden">
         {publication.thumbnail_url && (
           <div className="-mx-5 -mt-5 mb-5 aspect-video overflow-hidden bg-zinc-900">
-            <img src={publication.thumbnail_url} alt="" className="h-full w-full object-cover object-center" />
+            <img src={publication.thumbnail_url} alt="" width="640" height="360" loading="lazy" decoding="async" className="h-full w-full object-cover object-center" />
           </div>
         )}
         <span className="publication-icon"><Icon size={20} /></span>
@@ -339,7 +381,7 @@ export default function PublicationsSection() {
       )}
 
       {isLoading ? (
-        <p className="mt-8 text-sm text-zinc-400">Chargement des publications...</p>
+        <p className="mt-8 text-sm text-zinc-400" role="status" aria-live="polite">Chargement des publications…</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
           {featuredPublications.map(renderPublicationCard)}
@@ -347,12 +389,24 @@ export default function PublicationsSection() {
       )}
 
       {!isMobile && !showAll && additionalPublications.length > 0 && (
-        <div className="publication-marquee mt-4" aria-label="Autres publications">
-          <div className="publication-marquee-track">
-            {additionalPublications.map(renderPublicationCard)}
-            {additionalPublications.map((publication) => renderPublicationCard({ ...publication, id: `${publication.id}-duplicate` }))}
+        <>
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              aria-pressed={isMarqueePaused}
+              onClick={() => setIsMarqueePaused((paused) => !paused)}
+              className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:text-white focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+            >
+              {isMarqueePaused ? 'Reprendre le défilement' : 'Mettre en pause le défilement'}
+            </button>
           </div>
-        </div>
+          <div className="publication-marquee" aria-label="Autres publications">
+            <div className={`publication-marquee-track${isMarqueePaused ? ' is-paused' : ''}`}>
+              {additionalPublications.map(renderPublicationCard)}
+              {additionalPublications.map((publication) => renderPublicationCard({ ...publication, id: `${publication.id}-duplicate` }))}
+            </div>
+          </div>
+        </>
       )}
 
       {isMobile && publications.length > 1 && (
@@ -361,7 +415,7 @@ export default function PublicationsSection() {
         </button>
       )}
 
-      <button type="button" onClick={() => setIsAdminOpen(!isAdminOpen)} className="mt-8 mx-auto flex items-center gap-2 text-xs text-zinc-600 hover:text-[#D4AF37] transition-colors">
+      <button type="button" onClick={() => setIsAdminOpen(!isAdminOpen)} aria-expanded={isAdminOpen} className="mt-8 mx-auto flex items-center gap-2 text-xs text-zinc-400 hover:text-[#D4AF37] transition-colors">
         <LockKeyhole size={14} /> Espace administrateur
       </button>
 
@@ -372,8 +426,10 @@ export default function PublicationsSection() {
           ) : !session ? (
             <form onSubmit={handleLogin} className="mx-auto max-w-md space-y-3">
               <h3 className="text-white font-bold text-lg">Connexion administrateur</h3>
-              <input required type="email" placeholder="Email administrateur" value={login.email} onChange={(event) => setLogin({ ...login, email: event.target.value })} className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" />
-              <input required type="password" placeholder="Mot de passe" value={login.password} onChange={(event) => setLogin({ ...login, password: event.target.value })} className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" />
+              <label className="sr-only" htmlFor="admin-email">Email administrateur</label>
+              <input id="admin-email" name="email" autoComplete="username" required type="email" placeholder="Email administrateur…" value={login.email} onChange={(event) => setLogin({ ...login, email: event.target.value })} className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" />
+              <label className="sr-only" htmlFor="admin-password">Mot de passe</label>
+              <input id="admin-password" name="password" autoComplete="current-password" required type="password" placeholder="Mot de passe" value={login.password} onChange={(event) => setLogin({ ...login, password: event.target.value })} className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" />
               <button type="submit" className="inline-flex items-center gap-2 rounded-lg bg-[#D4AF37] px-4 py-3 text-sm font-bold text-black hover:bg-[#e3c45b]">Se connecter <LockKeyhole size={16} /></button>
             </form>
           ) : !isAdmin ? (
@@ -386,12 +442,15 @@ export default function PublicationsSection() {
                 <button type="button" onClick={handleLogout} className="text-xs text-zinc-400 hover:text-white">Se déconnecter</button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input required placeholder="Titre" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" />
-                <select value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]"><option>Veille technologique</option><option>Réflexion personnelle</option><option>Problème & solution</option></select>
+                <label className="sr-only" htmlFor="publication-title">Titre</label>
+                <input id="publication-title" name="title" autoComplete="off" required placeholder="Titre…" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" />
+                <label className="sr-only" htmlFor="publication-category">Catégorie</label>
+                <select id="publication-category" name="category" value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]"><option>Veille technologique</option><option>Réflexion personnelle</option><option>Problème & solution</option></select>
               </div>
-              <input required placeholder="Résumé court" value={form.excerpt} onChange={(event) => setForm({ ...form, excerpt: event.target.value })} className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" />
+              <label className="sr-only" htmlFor="publication-excerpt">Résumé court</label>
+              <input id="publication-excerpt" name="excerpt" autoComplete="off" required placeholder="Résumé court…" value={form.excerpt} onChange={(event) => setForm({ ...form, excerpt: event.target.value })} className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" />
               <RichTextEditor value={form.content} onChange={(content) => setForm({ ...form, content })} onImageUpload={uploadPublicationImage} />
-              <label className="block text-sm text-zinc-400">Date et heure de publication<input required type="datetime-local" value={form.publishedAt} onChange={(event) => setForm({ ...form, publishedAt: event.target.value })} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" /></label>
+              <label className="block text-sm text-zinc-400">Date et heure de publication<input name="publishedAt" required type="datetime-local" value={form.publishedAt} onChange={(event) => setForm({ ...form, publishedAt: event.target.value })} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]" /></label>
               <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-400 hover:border-[#D4AF37]"><ImagePlus size={18} className="text-[#D4AF37]" /> {thumbnail ? thumbnail.name : 'Ajouter une miniature'}<input type="file" accept="image/*" onChange={(event) => setThumbnail(event.target.files?.[0] || null)} className="hidden" /></label>
               <div className="flex flex-wrap gap-3">
                 <button disabled={isSaving} type="submit" className="inline-flex items-center gap-2 rounded-lg bg-[#D4AF37] px-5 py-3 text-sm font-bold text-black disabled:opacity-50">{editingPublication ? <Save size={17} /> : <Plus size={17} />} {isSaving ? 'Enregistrement...' : editingPublication ? 'Enregistrer les modifications' : 'Publier maintenant'}</button>
@@ -417,21 +476,21 @@ export default function PublicationsSection() {
             </div>
             </div>
           )}
-          {message && <p className="mt-4 text-sm text-[#D4AF37]">{message}</p>}
+          {message && <p className="mt-4 text-sm text-[#D4AF37]" role="status" aria-live="polite">{message}</p>}
         </div>
       )}
 
       {selectedPublication && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" role="dialog" aria-modal="true" onClick={() => setSelectedPublication(null)}>
-          <article className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-zinc-700 bg-[#121214] p-6 md:p-8" onClick={(event) => event.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" role="dialog" aria-modal="true" aria-labelledby="selected-publication-title" onKeyDown={(event) => { if (event.key === 'Escape') setSelectedPublication(null); }}>
+          <article className="relative max-h-[90vh] w-full max-w-2xl overscroll-contain overflow-y-auto rounded-2xl border border-zinc-700 bg-[#121214] p-6 md:p-8">
             <button type="button" onClick={() => setSelectedPublication(null)} aria-label="Fermer" className="absolute right-4 top-4 text-zinc-400 hover:text-white"><X size={20} /></button>
             {selectedPublication.thumbnail_url && (
               <div className="mb-6 overflow-hidden rounded-xl bg-zinc-900">
-                <img src={selectedPublication.thumbnail_url} alt="" className="max-h-[20rem] w-full object-contain object-center" />
+                <img src={selectedPublication.thumbnail_url} alt="" width="640" height="360" loading="lazy" decoding="async" className="max-h-[20rem] w-full object-contain object-center" />
               </div>
             )}
             <span className="publication-meta">{selectedPublication.category} · Publié le {formatDateTime(selectedPublication.published_at)}</span>
-            <h3 className="mt-3 text-2xl font-bold text-white">{selectedPublication.title}</h3>
+            <h3 id="selected-publication-title" className="mt-3 text-2xl font-bold text-white">{selectedPublication.title}</h3>
             <div className="publication-content mt-6 text-[0.98rem] leading-8 text-zinc-300" dangerouslySetInnerHTML={{ __html: formatContent(selectedPublication.content) }} />
           </article>
         </div>

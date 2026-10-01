@@ -21,8 +21,6 @@ import PublicationsSection from './components/PublicationsSection';
 
 const CustomStyles = () => (
   <style dangerouslySetInnerHTML={{ __html: `
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
-
     :root {
       --gold: #D4AF37;
       --bg-dark: #0a0a0c;
@@ -432,6 +430,7 @@ const CustomStyles = () => (
       gap: 1rem;
       animation: publication-marquee 34s linear infinite;
     }
+    .publication-marquee-track.is-paused { animation-play-state: paused; }
 
     .publication-marquee .publication-card {
       width: min(28rem, calc((100vw - 4rem) / 3));
@@ -549,8 +548,7 @@ const CustomStyles = () => (
 
     .timeline-line { position: absolute; left: 11px; top: 24px; bottom: 0; width: 1px; background: linear-gradient(to bottom, var(--gold) 0%, transparent 100%); opacity: 0.3; }
 
-    :focus { outline: none; }
-    :focus-visible { outline: 3px solid rgba(212,175,55,0.18); outline-offset: 3px; }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
     .btn-focus { transition: box-shadow .15s ease; }
     .btn-focus:focus-visible { box-shadow: 0 0 0 6px rgba(212,175,55,0.08); }
@@ -648,6 +646,13 @@ const CustomStyles = () => (
     }
 
     @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
       .reveal { transition: none !important; transform: none !important; }
       .stack-marquee-track { animation: none !important; }
       .publication-marquee-track { animation: none !important; }
@@ -702,7 +707,7 @@ const TechMarquee = () => {
       {stackItems.map((item, index) => (
         <div key={`${item.name}-${isDuplicate ? 'duplicate-' : ''}${index}`} className="stack-badge">
           <span className="stack-icon">
-            <img src={item.logo} alt={`${item.name} logo`} />
+            <img src={item.logo} alt="" width="35" height="35" loading="lazy" decoding="async" />
           </span>
           <span>{item.name}</span>
         </div>
@@ -729,9 +734,9 @@ export default function App() {
     <div className="page-shell min-h-screen text-zinc-300 selection:bg-[#D4AF37] selection:text-black">
       <CustomStyles />
 
-      <header role="banner" className="max-w-5xl mx-auto px-6 py-4 md:py-6 flex items-center justify-between">
+      <header role="banner" className="max-w-5xl mx-auto px-6 py-4 md:py-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <a href="#home" className="text-white font-serif text-lg">Ibrahim <span className="text-[#D4AF37]">Samake</span></a>
-        <nav aria-label="Navigation principale" className="hidden sm:flex items-center gap-4 text-sm text-zinc-400">
+        <nav aria-label="Navigation principale" className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-zinc-300">
           <a href="#experience" className="hover:text-white">Projets</a>
           <a href="#publications" className="hover:text-white">Publications</a>
           <a href="#education" className="hover:text-white">Parcours</a>
@@ -744,9 +749,11 @@ export default function App() {
           <RevealOnScroll>
             <div className="profile-orb mb-4">
               <img
-                src="/photo_profil.png"
+                src="/photo_profil.webp"
                 alt="Portrait d'Ibrahim Samake"
-                className=""
+                width="1086"
+                height="1448"
+                fetchPriority="high"
               />
             </div>
           </RevealOnScroll>
@@ -909,7 +916,7 @@ export default function App() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <RevealOnScroll delay={100}>
-              <div className="bg-[#121214] border border-zinc-800/80 hover:border-[#D4AF37]/50 rounded-2xl p-6 transition-all group h-full">
+              <div className="bg-[#121214] border border-zinc-800/80 hover:border-[#D4AF37]/50 rounded-2xl p-6 transition-[border-color,transform,box-shadow] group h-full">
                 <Cpu className="text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform" size={28} />
                 <h3 className="text-white font-bold text-lg mb-2">C++ & Python</h3>
                 <p className="text-zinc-400 text-sm font-light leading-relaxed">
@@ -919,7 +926,7 @@ export default function App() {
             </RevealOnScroll>
 
             <RevealOnScroll delay={200}>
-              <div className="bg-[#121214] border border-zinc-800/80 hover:border-[#D4AF37]/50 rounded-2xl p-6 transition-all group h-full">
+              <div className="bg-[#121214] border border-zinc-800/80 hover:border-[#D4AF37]/50 rounded-2xl p-6 transition-[border-color,transform,box-shadow] group h-full">
                 <Code2 className="text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform" size={28} />
                 <h3 className="text-white font-bold text-lg mb-2">Frontend Engineering</h3>
                 <p className="text-zinc-400 text-sm font-light leading-relaxed">
@@ -929,7 +936,7 @@ export default function App() {
             </RevealOnScroll>
 
             <RevealOnScroll delay={300}>
-              <div className="bg-[#121214] border border-zinc-800/80 hover:border-[#D4AF37]/50 rounded-2xl p-6 transition-all group h-full">
+              <div className="bg-[#121214] border border-zinc-800/80 hover:border-[#D4AF37]/50 rounded-2xl p-6 transition-[border-color,transform,box-shadow] group h-full">
                 <Layers className="text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform" size={28} />
                 <h3 className="text-white font-bold text-lg mb-2">Outils & Design</h3>
                 <p className="text-zinc-400 text-sm font-light leading-relaxed">
@@ -939,7 +946,7 @@ export default function App() {
             </RevealOnScroll>
 
             <RevealOnScroll delay={400}>
-              <div className="bg-[#121214] border border-zinc-800/80 hover:border-[#D4AF37]/50 rounded-2xl p-6 transition-all group h-full">
+              <div className="bg-[#121214] border border-zinc-800/80 hover:border-[#D4AF37]/50 rounded-2xl p-6 transition-[border-color,transform,box-shadow] group h-full">
                 <Globe2 className="text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform" size={28} />
                 <h3 className="text-white font-bold text-lg mb-2">Soft Skills</h3>
                 <p className="text-zinc-400 text-sm font-light leading-relaxed">
@@ -996,7 +1003,7 @@ export default function App() {
                 href="https://drive.google.com/uc?export=download&id=1JU8B0R8_AeArCpqi9oh0522vCaBginXR"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full md:w-auto bg-white text-black hover:bg-gray-100 font-semibold py-3 px-8 rounded-full flex items-center justify-center gap-2 transition-all shadow-[0_0_12px_rgba(0,0,0,0.5)] btn-focus"
+                className="w-full md:w-auto bg-white text-black hover:bg-gray-100 font-semibold py-3 px-8 rounded-full flex items-center justify-center gap-2 transition-colors shadow-[0_0_12px_rgba(0,0,0,0.5)] btn-focus"
                 >
                 Télécharger CV PDF <Download size={18} />
               </a>
@@ -1025,8 +1032,12 @@ export default function App() {
           </RevealOnScroll>
         </section>
 
-        <footer role="contentinfo" className="max-w-4xl mx-auto px-6 pb-12 text-center text-sm text-zinc-500">
-          © {new Date().getFullYear()} Ibrahim Samake — Tous droits réservés.
+        <footer role="contentinfo" className="max-w-4xl mx-auto px-6 pb-12 text-center text-sm text-zinc-400">
+          <p>© {new Date().getFullYear()} Ibrahim Samake — Tous droits réservés.</p>
+          <nav aria-label="Informations légales" className="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-2">
+            <a className="hover:text-white focus-visible:underline" href="/confidentialite.html">Confidentialité</a>
+            <a className="hover:text-white focus-visible:underline" href="/cgu.html">Conditions d’utilisation</a>
+          </nav>
         </footer>
       </main>
     </div>
