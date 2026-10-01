@@ -50,13 +50,19 @@ const categoryIcons = {
   'Problème & solution': MessageCircle,
 };
 
-const emptyForm = {
+const toDateTimeLocal = (date) => {
+  const localDate = new Date(date);
+  const timezoneOffset = localDate.getTimezoneOffset() * 60_000;
+  return new Date(localDate.getTime() - timezoneOffset).toISOString().slice(0, 16);
+};
+
+const createEmptyForm = () => ({
   title: '',
   excerpt: '',
   content: '',
   category: 'Veille technologique',
-  publishedAt: new Date().toISOString().slice(0, 16),
-};
+  publishedAt: toDateTimeLocal(new Date()),
+});
 
 const formatDateTime = (date) => new Intl.DateTimeFormat('fr-FR', {
   day: '2-digit',
@@ -168,7 +174,7 @@ export default function PublicationsSection() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [session, setSession] = useState(null);
   const [login, setLogin] = useState({ email: '', password: '' });
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(createEmptyForm);
   const [thumbnail, setThumbnail] = useState(null);
   const [editingPublication, setEditingPublication] = useState(null);
   const [message, setMessage] = useState('');
@@ -254,7 +260,7 @@ export default function PublicationsSection() {
       excerpt: publication.excerpt,
       content: publication.content,
       category: publication.category,
-      publishedAt: new Date(publication.published_at).toISOString().slice(0, 16),
+      publishedAt: toDateTimeLocal(publication.published_at),
     });
     setThumbnail(null);
     window.scrollTo({ top: document.getElementById('publications')?.offsetTop || 0, behavior: 'smooth' });
@@ -262,7 +268,7 @@ export default function PublicationsSection() {
 
   const cancelEditing = () => {
     setEditingPublication(null);
-    setForm(emptyForm);
+    setForm(createEmptyForm());
     setThumbnail(null);
   };
 
